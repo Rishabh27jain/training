@@ -1,0 +1,61 @@
+*** Settings ***
+Documentation   To validate the Login form
+Library     SeleniumLibrary
+Library     Collections
+Library     Verify.py
+Library     BuiltIn
+Test Setup      Open browser    https://intranet.einfochips.com    Chrome
+Suite Teardown	Close Browser
+
+
+*** Test Cases ***
+Intranet Search Username
+    wait until element present
+    Login to Intranet
+    Enter name in search field
+    Verify the result table ,name must contain keywords
+*** Variables ***
+${search_variable}      rish
+${email}		xyz@einfochips.com
+${Password}		******
+*** Keywords ***
+wait until element present
+    Wait Until Element Is Visible   id:cantAccessAccount      timeout=50
+
+Login to Intranet
+    Input Text          xpath://*[@type='email']    ${email}
+    click button        id:idSIButton9
+    input password      id:i0118                    ${Password}
+    Wait Until Element Is Visible   id:idA_PWD_ForgotPassword      timeout=50
+    click button        xpath://input[@id="idSIButton9"]
+    sleep                30
+    Wait Until Element is Visible   id:displayName             timeout=50
+    click button        id:idSIButton9
+
+Enter name in search field
+
+    @{actuallist}=     create list
+    Set Global Variable     @{actuallist}
+    input text          id:birds                       ${search_variable}
+    sleep               20
+    Press Keys          id:birds                       ENTER
+
+    ${elements}=  get element count    css:table.table-hover>tbody>tr:nth-child(n)
+     FOR    ${i}    IN RANGE    ${elements}
+        Exit For Loop If      '${i}' == '${elements}'
+
+        ${n}=   Evaluate   ${i} +1
+        ${name}       get text        css:table.table-hover>tbody>tr:nth-child(${n})>td:nth-child(2)
+
+        Append To List    ${actuallist}       ${name}
+        ${i}=  Evaluate   ${i} + 1
+     END
+     LOG    ${actuallist}
+
+Verify the result table ,name must contain keywords
+    
+    FOR  ${element}     IN  ${actuallist}
+	Should Contain Match   ${element}   ${search_variable}
+        
+    END
+
