@@ -55,7 +55,7 @@ Enter name in search field
 Verify the result table ,name must contain keywords
     
     FOR  ${element}     IN  ${actuallist}
-	Should Contain Match   ${element}   ${search_variable}
+	${contains}=    Run Keyword And Return Status    Should Contain    ${element}    ${search_variable}
         
     END
 
